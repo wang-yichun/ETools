@@ -12,6 +12,8 @@ namespace Ethan.ETools
 		public float uvScale = 1;
 		public float uvRotation;
 
+		public int sortingOrder = 2;
+
 		public void BuildMesh (List<Vector2> points)
 		{
 			Renderer rend = gameObject.GetComponent<MeshRenderer> ();

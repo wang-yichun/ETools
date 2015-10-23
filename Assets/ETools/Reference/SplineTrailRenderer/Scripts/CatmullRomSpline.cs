@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class Knot
 {
 	public float distanceFromStart = -1f;
-	public CatmullRomSpline.SubKnot[] subKnots = new CatmullRomSpline.SubKnot[CatmullRomSpline.NbSubSegmentPerSegment + 1]; //[0, 1]
+	public CatmullRomSpline.SubKnot[] subKnots;
 	public Vector3 position;
 
 	public Knot (Vector3 position)
@@ -38,11 +38,22 @@ public class CatmullRomSpline
 	}
 
 	public List<Knot> knots = new List<Knot> ();
-	public const int NbSubSegmentPerSegment = 10;
+	public int NbSubSegmentPerSegment = 10;
 	private const int MinimumKnotNb = 4;
 	private const int FirstSegmentKnotIndex = 2;
 	
 	public int NbSegments { get { return System.Math.Max (0, knots.Count - 3); } }
+
+	public void AddKnot (Vector3 position)
+	{
+		AddKnot (new Knot (position));
+	}
+
+	public void AddKnot (Knot knot)
+	{
+		knot.subKnots = new CatmullRomSpline.SubKnot[NbSubSegmentPerSegment + 1];
+		knots.Add (knot);
+	}
 
 	public Vector3 FindPositionFromDistance (float distance)
 	{

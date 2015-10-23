@@ -13,7 +13,10 @@ namespace Ethan.ETools.Test
 		void Start ()
 		{
 			EMesh.BuildMesh (GetVertexList ().Select (_ => new Vector2 (_.x, _.y)).ToList ());
-			ESplineTrail.BuildMesh (GetVertexList ().ToList ());
+			ESplineTrail.BuildPolygonMesh (GetVertexList ().ToList ());
+
+			EMesh.GetComponent<MeshRenderer> ().sortingOrder = 2;
+			ESplineTrail.GetComponent<MeshRenderer> ().sortingOrder = 4;
 		}
 
 		void OnDrawGizmos ()

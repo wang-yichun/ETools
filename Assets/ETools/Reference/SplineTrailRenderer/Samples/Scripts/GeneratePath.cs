@@ -15,7 +15,7 @@ public class GeneratePath : MonoBehaviour
 		
 		foreach(Transform t in pointList)
 		{
-			trail.spline.knots.Add(new Knot(t.position));
+			trail.spline.AddKnot(t.position);
 		}
 		
 		trail.spline.Parametrize();
