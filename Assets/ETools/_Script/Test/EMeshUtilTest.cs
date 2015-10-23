@@ -8,10 +8,12 @@ namespace Ethan.ETools.Test
 	public class EMeshUtilTest : MonoBehaviour
 	{
 		public EMesh EMesh;
+		public ESplineTrail ESplineTrail;
 
 		void Start ()
 		{
 			EMesh.BuildMesh (GetVertexList ().Select (_ => new Vector2 (_.x, _.y)).ToList ());
+			ESplineTrail.BuildMesh (GetVertexList ().ToList ());
 		}
 
 		void OnDrawGizmos ()
