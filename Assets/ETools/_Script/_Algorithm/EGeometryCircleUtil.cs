@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System.Linq;
 
-namespace Ethan.EUWork.Algorithm
+namespace Ethan.ETools.Algorithm
 {
 	public class EGeometryCircleUtil
 	{

@@ -1,37 +1,105 @@
-﻿using System;
+﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
-using System.Linq;
+using Ethan.ETools.Algorithm;
 
-namespace Ethan.EUWork.Algorithm
+namespace Ethan.ETools
 {
-	public class EGeometryTriangleUtil
+	public class EMesh : MonoBehaviour
 	{
-		public static int[] Points (List<Vector3> points)
+		public Material mat;
+		public Vector2 uvPosition;
+		public float uvScale = 1;
+		public float uvRotation;
+
+		public void BuildMesh (List<Vector2> points)
+		{
+			Renderer rend = gameObject.GetComponent<MeshRenderer> ();
+			if (rend == null) {
+				rend = gameObject.AddComponent<MeshRenderer>();
+			}
+			rend.material = mat;
+			
+			gameObject.GetComponent<MeshRenderer> ().enabled = true;
+			
+			//	var points = GetEdgePoints();
+			var vertices = new Vector3[points.Count]; 
+			
+			for (int i = 0; i < points.Count; i++) {
+				vertices [i] = points [i];
+			}
+			
+			//Build the index array
+			var indices = new List<int> ();
+			while (indices.Count < points.Count)
+				indices.Add (indices.Count);
+			
+			//Build the triangle array
+			var triangles = Triangulates.Points (points);
+			
+			//Build the uv array
+			var scale = uvScale != 0 ? (1 / uvScale) : 0;
+			var matrix = Matrix4x4.TRS (-uvPosition, Quaternion.Euler (0, 0, uvRotation), new Vector3 (scale, scale, 1));
+			var uv = new Vector2[points.Count];
+			for (int i = 0; i < uv.Length; i++) {
+				var p = matrix.MultiplyPoint (points [i]);
+				uv [i] = new Vector2 (p.x, p.y);
+			}
+			
+			//Find the mesh (create it if it doesn't exist)
+			
+			MeshFilter meshFilter = gameObject.GetComponent<MeshFilter> ();
+			if (meshFilter == null) {
+				
+				meshFilter = gameObject.AddComponent<MeshFilter> ();
+				
+			}
+			Mesh mesh = meshFilter.sharedMesh;
+			
+			if (mesh == null) {
+				mesh = new Mesh ();
+				mesh.name = "PolySprite_Mesh";
+				meshFilter.mesh = mesh;
+			}
+			
+			
+			//Update the mesh
+			mesh.Clear ();
+			mesh.vertices = vertices;
+			mesh.uv = uv;
+			mesh.triangles = triangles;
+			mesh.RecalculateNormals ();
+			mesh.Optimize ();
+		}
+		
+		
+	}
+	
+	public static class Triangulates
+	{
+		public static int[] Points (List<Vector2> points)
 		{
 			var indices = new List<int> ();
-				
+			
 			int n = points.Count;
 			if (n < 3)
 				return indices.ToArray ();
-				
+			
 			int[] V = new int[n];
-//			if (Area (points) > 0) {
-			if (true) {
+			if (Area (points) > 0) {
 				for (int v = 0; v < n; v++)
 					V [v] = v;
 			} else {
 				for (int v = 0; v < n; v++)
 					V [v] = (n - 1) - v;
 			}
-				
+			
 			int nv = n;
 			int count = 2 * nv;
 			for (int m = 0, v = nv - 1; nv > 2;) {
 				if ((count--) <= 0)
 					return indices.ToArray ();
-					
+				
 				int u = v;
 				if (nv <= u)
 					u = 0;
@@ -41,7 +109,7 @@ namespace Ethan.EUWork.Algorithm
 				int w = v + 1;
 				if (nv <= w)
 					w = 0;
-					
+				
 				if (Snip (points, u, v, w, nv, V)) {
 					int a, b, c, s, t;
 					a = V [u];
@@ -57,11 +125,11 @@ namespace Ethan.EUWork.Algorithm
 					count = 2 * nv;
 				}
 			}
-				
+			
 			indices.Reverse ();
 			return indices.ToArray ();
 		}
-			
+		
 		public static float Area (List<Vector2> points)
 		{
 			int n = points.Count;
@@ -73,16 +141,8 @@ namespace Ethan.EUWork.Algorithm
 			}
 			return (A * 0.5f);
 		}
-
-		public static float TriangleArea (Vector3 A, Vector3 B, Vector3 C)
-		{
-			Vector3 AB = B - A;
-			Vector3 AC = C - A;
-
-			return Vector3.Cross (AB, AC).magnitude;
-		}
-			
-		static bool Snip (List<Vector3> points, int u, int v, int w, int n, int[] V)
+		
+		static bool Snip (List<Vector2> points, int u, int v, int w, int n, int[] V)
 		{
 			int p;
 			Vector3 A = points [V [u]];
@@ -99,12 +159,12 @@ namespace Ethan.EUWork.Algorithm
 			}
 			return true;
 		}
-			
+		
 		static bool InsideTriangle (Vector2 A, Vector2 B, Vector2 C, Vector2 P)
 		{
 			float ax, ay, bx, by, cx, cy, apx, apy, bpx, bpy, cpx, cpy;
 			float cCROSSap, bCROSScp, aCROSSbp;
-				
+			
 			ax = C.x - B.x;
 			ay = C.y - B.y;
 			bx = A.x - C.x;
@@ -117,22 +177,12 @@ namespace Ethan.EUWork.Algorithm
 			bpy = P.y - B.y;
 			cpx = P.x - C.x;
 			cpy = P.y - C.y;
-				
+			
 			aCROSSbp = ax * bpy - ay * bpx;
 			cCROSSap = cx * apy - cy * apx;
 			bCROSScp = bx * cpy - by * cpx;
-				
+			
 			return ((aCROSSbp >= 0.0f) && (bCROSScp >= 0.0f) && (cCROSSap >= 0.0f));
 		}
-
-		static bool InsideTriangle (Vector3 A, Vector3 B, Vector3 C, Vector3 P)
-		{
-			float ABP = TriangleArea (A, B, P);
-			float BCP = TriangleArea (B, C, P);
-			float CAP = TriangleArea (C, A, P);
-			float ABC = TriangleArea (A, B, C);
-			return Math.Abs (ABC - ABP - BCP - CAP) < .0001f;
-		}
-
 	}
 }

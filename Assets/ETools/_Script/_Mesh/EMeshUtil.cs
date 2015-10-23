@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Ethan.EUWork
+namespace Ethan.ETools
 {
 	public class EMeshUtil
 	{

@@ -2,8 +2,9 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Ethan.ETools.Algorithm;
 
-namespace Ethan.EUWork.Algorithm.Test
+namespace Ethan.ETools.Test
 {
 	public class EGeometryCircleUtilTest : MonoBehaviour
 	{
